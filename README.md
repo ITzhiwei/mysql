@@ -40,7 +40,49 @@ Db::crateSqlObj($config);
 **/
 /** 初始化结束 **/
 
-//经典用法
+//原生用法
+//read查询使用 ? 占位进行预处理，可防止SQL注入；Db::read() 返回的是二维数组结果集或者无结果空数组
+$row = Db::read("SELECT * FROM article WHERE id<? AND title like ?", [50,'%张三%']);
+//write 写数据，更新、删除、插入等使用；执行返回的是受影响条数(新增条数、更新条数、删除条数)；
+$res = Db::write("INSERT INTO `article`(title,content,user_id) VALUES(?, ?, ?)", [$title, $content, $uid]);
+
+//经典用法，全部自动使用预处理防SQL注入，自动加反引号防关键词冲突，这俩个和上面原生执行的返回结果一样
+$row = Db::table('article')->where([ ['id', '<', 50], ['title', 'like', '%张三%'] ])->select();
+$res = Db::table('article')->insert(['title'=>$title, 'content'=>$content, 'user_id'=>$uid]);
+//获取单个数据，下面真实执行语句： SELECT `title` FROM `article` WHERE `id`=50 LIMIT 0,1  
+$title = Db::table('article')->where('id', 50)->value('title');
+//获取单行数据，返回的是一维数组 ['title'=>'标题', ...]
+$article = Db::table('article')->where('id', 50)->select('*', false);
+//更新 id<50 的行进行更新，返回受影响条数
+$res = Db::table('article')->where('id', '<', 50)->update(['title'=>'newTitle']);
+//和上面执行一样，第2个参数为更新白名单，不存在白名单不更新
+$res = Db::table('article')->where('id', '<', 50)->update($_POST, 'title');
+//删除，默认条件下必须设置where才可以删除，否则报错；如果要强制无条件删除，设置 ->delete(true)
+$res = Db::table('article')->where('id', '<', 50)->delete();
 
 ?>
 ```
+#手册
+**::table($tableString, $transform = true)**  
+$tableString 可以是单个表名，也可以是关联表，例如:  
+$tableString = 'users a left join email b on(a.id=b.user_id)'  
+这样 $tableString 就很灵活了，而且不管你怎么写，都会自动加反引号。
+$transform，是否为 $tableString 自动添加反引号。如果你确保自己不需要加反引号，可以设置为 false
+
+**->where($where, $conditionOrValue = null, $value = null)**  
+where 可以仅接受1个参数，这个参数必须是数组，一维数组或二维数组  
+一维数组，如果是3个值，那么中间是作为条件，如：['name', '=', '张三']，俩个值则条件为"="号['name', '张三']
+二维数组，可以传入多个值，如：[ ['name', '张三'], ['age', '>', 18] ] //WHERE \`name\`='张三' AND \`age\`>18  
+
+where 可以传入 $conditionOrValue 和 $value 如：  
+where('name', '张三') 或者 where('name', '=', '张三')
+
+**->select($field = '\*', $more = true)**  
+$field 是需要查询的字段，默认是所有，即\* 
+$more 默认为true，查询多行，返回二位数组结果集，设置为false时即为查询单行，即 LIMIT 0,1  返回一维数组结果集
+
+
+
+
+
+
