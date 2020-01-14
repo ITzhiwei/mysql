@@ -62,7 +62,7 @@ $res = Db::table('article')->where('id', '<', 50)->delete();
 
 ?>
 ```
-#手册
+# 手册
 **::table($tableString, $transform = true)**  
 $tableString 可以是单个表名，也可以是关联表，例如:  
 $tableString = 'users a left join email b on(a.id=b.user_id)'  
