@@ -66,19 +66,19 @@ $res = Db::table('article')->where('id', '<', 50)->delete();
 **::table($tableString, $transform = true)**  
 $tableString 可以是单个表名，也可以是关联表，例如:  
 $tableString = 'users a left join email b on(a.id=b.user_id)'  
-这样 $tableString 就很灵活了，而且不管你怎么写，都会自动加反引号。
+这样 $tableString 就很灵活了，而且不管你怎么写，都会自动加反引号。  
 $transform，是否为 $tableString 自动添加反引号。如果你确保自己不需要加反引号，可以设置为 false
 
 **->where($where, $conditionOrValue = null, $value = null)**  
 where 可以仅接受1个参数，这个参数必须是数组，一维数组或二维数组  
-一维数组，如果是3个值，那么中间是作为条件，如：['name', '=', '张三']，俩个值则条件为"="号['name', '张三']
+一维数组，如果是3个值，那么中间是作为条件，如：['name', '=', '张三']，俩个值则条件为"="号['name', '张三']  
 二维数组，可以传入多个值，如：[ ['name', '张三'], ['age', '>', 18] ] //WHERE \`name\`='张三' AND \`age\`>18  
 
 where 可以传入 $conditionOrValue 和 $value 如：  
 where('name', '张三') 或者 where('name', '=', '张三')
 
 **->select($field = '\*', $more = true)**  
-$field 是需要查询的字段，默认是所有，即\* 
+$field 是需要查询的字段，默认是所有，即\*   
 $more 默认为true，查询多行，返回二位数组结果集，设置为false时即为查询单行，即 LIMIT 0,1  返回一维数组结果集
 
 
