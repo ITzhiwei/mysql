@@ -1201,13 +1201,20 @@ class Db{
         }
         return $this;
     }
-    
+
     /**
-     * @param string $group
+     * @param string|array $group
      * @return $this
      */
     public function group($group){
-        $group = self::transform($group, ',');
+        if(is_array($group)){
+            foreach ($group as $key=>$value){
+                $group[$key] = self::transform($value);
+            }
+            $group = implode(',', $group);
+        }else{
+            $group = self::transform($group);
+        }
         $this->groupStr = "GROUP BY $group";
         return $this;
     }
