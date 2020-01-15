@@ -43,12 +43,12 @@ class Db{
     public static $sqlDebug = true;
     /**
      * mysql write 链接；单一数据库时负责读写，读写分离时负责写
-     * @var mysqlConnectObj
+     * @var object mysqlConnectObj
      */
     public static $writeMysql = null;
     /**
      * mysql read 链接；读写分离时负责读
-     * @var mysqlConnectObj
+     * @var object mysqlConnectObj
      */
     public static $readMysql = null;
     /**
@@ -75,7 +75,6 @@ class Db{
      * @var string
      */
     protected $table = null;
-    //::table()中要清空下面这些条件 $table自身不请空，可二次使用
     /**
      * 当前拼接的where语句
      * @var string
@@ -105,12 +104,22 @@ class Db{
      */
     protected $havingStr = '';
     /**
+     * 多数据库服务时是否强制选择 $writeMysql
+     */
+    protected static $selectMasterSql = false;
+    /**
+     * 多数据库服务时强制选择 $writeMysql 的表名存放处
+     */
+    protected static $selectMasterSqlTable = [];
+
+    /**
      * 是否执行sql，如果只是想看下拼接的SQL语句是什么，设为false即可
      * @var bool
      */
     protected static $sqlQuery = true;
 
     /**
+     * 所有操作都需要经过这里获取 mysql 链接句柄
      * @param string $sqlStr
      * @return object mysqlConnect
      */
@@ -129,7 +138,7 @@ class Db{
             self::crateSqlObj($config, 'write');
         }
         if($config['deploy'] == 1 && $config['rwSeparate']){
-                if($sqlCDUS == 'select'){
+                if($sqlCDUS == 'select' && self::$selectMasterSql == false){
                     return self::$readMysql;
                 }else{
                     return self::$writeMysql;
@@ -183,7 +192,7 @@ class Db{
     
     /**
      * mysqli预处理原生语句执行模式，若无绑定则不使用预处理模式执行；更新、删除、插入
-     * @param $sqlStr sql语句
+     * @param string $sqlStr sql语句
      * @param array $params 一维数组，参数排位要和sql语句中的位置一样
      * @param string $type 绑定参数类型。注意：若数据库字段为json格式并且where json对应的参数不是字符串，则该$type不能留空，要如实填写类型
      * @return int 受影响条数
@@ -213,16 +222,38 @@ class Db{
                     };
                     $numRows = $mysqli->affected_rows;
                 }
-                return $numRows;
+                $res = $numRows;
             }else{
-                return self::$sqlStr;
+                $res = self::$sqlStr;
             }
+            $config = self::$config;
+            if($config['readSelectMaster'] && $config['deploy'] == 1){
+                //多个服务器下并开启了一旦写了数据库某个表，这个表的后续操作都在 self::$writeMysql 里面进行
+                $thisObj = self::getThisObj();
+                $table = $thisObj->table;
+                if($table !== null){
+                    //识别 table 里面的表名，提取出来放到 slef::$selectMasterSqlTable 里面去
+                    $tableArr = self::getTableName();
+                    $tableArrOld = self::$selectMasterSqlTable;
+                    self::$selectMasterSqlTable = array_merge($tableArr, $tableArrOld);
+                }
+                $thisObj->table = null;
+            }
+
+            return $res;
      }
-    
+
+    /**
+     * 从 $this->table 中提取表名并返回
+     * @return array
+     */
+    protected static function getTableName(){
+         return [];
+    }
 
     /**
      * mysqli预处理原生语句执行模式，若无绑定则不使用预处理模式执行
-     * @param $sqlStr sql语句
+     * @param string $sqlStr sql语句
      * @param array $params 一维数组，参数排位要和sql语句中的位置一样
      * @param string $type 绑定参数类型。注意：若数据库字段为json格式并且where json对应的参数不是字符串，则该$type不能留空，要如实填写类型
      * @return array 有结果返回二维数组，无则空数组
@@ -382,7 +413,7 @@ class Db{
         }
         $obj = self::getThisObj();
         $obj->table = $table;
-        $obj->closeParamStr();
+        $obj->closeParamStr($table);
         return $obj;
     }
     
@@ -410,7 +441,7 @@ class Db{
     /**
      * 部分数据恢复初始化
      */
-    protected function closeParamStr(){
+    protected function closeParamStr($table){
         $this->whereStr = '';
         $this->whereValue = [];
         $this->limitStr = '';
@@ -418,6 +449,7 @@ class Db{
         $this->groupStr = '';
         $this->havingStr = '';
         self::$sqlQuery = true;
+        self::$selectMasterSql = false;
     }
 
     /**
@@ -432,6 +464,11 @@ class Db{
             $obj = self::$obj;
         }
         return $obj;
+    }
+
+    public function master(){
+        self::$selectMasterSql = true;
+        return $this;
     }
     
 
@@ -586,6 +623,9 @@ class Db{
                 if(empty($connectConfig['rwSeparate'])){
                     $connectConfig['rwSeparate'] = false;
                 }
+                if(empty($connectConfig['readSelectMaster'])){
+                    $connectConfig['readSelectMaster'] = false;
+                }
                 if(empty($connectConfig['slaveHost'])){
                     $connectConfig['slaveHost'] = [];
                     $connectConfig['slavePort'] = [];
@@ -621,6 +661,11 @@ class Db{
                 }else{
                     $rwSeparate = 'false';
                 }
+                if($connectConfig['readSelectMaster']){
+                    $readSelectMaster = 'true';
+                }else{
+                    $readSelectMaster = 'false';
+                }
                 if($connectConfigStr['sqlDebug']){
                     $sqlDebug = 'true';
                 }else{
@@ -642,6 +687,7 @@ class Db{
                                             'deploy'  => {$connectConfigStr['deploy']},
                                             //数据库读写是否分离，分布式有效；可以不读写分离，随机使用host里面的mysql数据库，负载均衡
                                             'rwSeparate' => $rwSeparate,
+                                            'readSelectMaster' => $readSelectMaster,
                                             //从数据库，从数据库服务器只读不写；注意：只有在读写分离才将链接信息写在下面
                                             'slaveHost' => {$connectConfigStr['slaveHost']},
                                             'slavePort' => {$connectConfigStr['slavePort']},

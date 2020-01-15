@@ -9,7 +9,7 @@ composer require lipowei/db
 require_once 'vendor/autoload.php';
 use lipowei\Db\Db;  
 /** 初始化 **/
-$config = [  
+$config = [//可将配置信息保存起来，以后无需配置就可直接使用：使用 Db::$configSave = true; + Db::crateSqlObj($config);下面有详细介绍 
            //主数据库，如果读写分离，主数据库服务器只写不读；如果读写不分离，将其他服务器的数据库链接信息加入host数组里面去就行了  
            'host' => ['localhost'],  
            'port' => ['3306'],  
@@ -20,7 +20,7 @@ $config = [
            'charset' => 'utf8mb4',  
            //是否显示SQL错误信息  
            'sqlDebug' => true,  
-           //数据库部署方式:0单一服务器  1分布式（2个或以上）  
+           //数据库部署方式:0单一服务器  1多个 mysql 服务器（2个或以上）  
            'deploy'  => 0,  
            //数据库读写是否分离，分布式有效  
            'rwSeparate' => false,  
