@@ -1,5 +1,5 @@
 {
-    "name": "lipowei/Db",
+    "name": "lipowei/db",
     "description": "mysql 数据库操作；安全：全程预处理模式防SQL注入，自动添加反引号防表字段与关键词冲突；该库使用的是 mysqli 模式；支持主从分布，支持配置参数保存；本类库注释多，可供学习使用；（题外话：这里说说 mysqli 与 PDO 重要区别。兼容：mysqli 仅支持 mysql 数据库，PDO 支持大部分数据库，PDO完胜；  性能：本人在 PHP7.3.5 + MYSQL5.7.25 环境测试下，都是使用预处理模式操作最基本的insert和select，每次循环500次，取10次数据计算平均值得出结果：insert下，mysqli仅比PDO快1.59%，基本可忽略。select下，mysqli比PDO快18.84%，由于PDO要兼容大部分数据库，所以性能上是不及mysqli的，若你的项目是使用mysql的同时追求毫秒级别的性能优化，那么mysqli比PDO更合适你）",
     "type": "library",
     "license": "MIT",

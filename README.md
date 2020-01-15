@@ -1,7 +1,7 @@
 # 版本支持
 php5.4、5.5、5.6、7.*
 # 安装
-composer require lipowei/Db
+composer require lipowei/db
 # 使用（支持主从分布读写分离）
 引入 vendor 目录下的 autoload.php  
 ```
