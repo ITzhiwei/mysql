@@ -49,14 +49,19 @@ $res = Db::write("INSERT INTO `article`(title,content,user_id) VALUES(?, ?, ?)",
 //经典用法，全部自动使用预处理防SQL注入，自动加反引号防关键词冲突，这俩个和上面原生执行的返回结果一样
 $row = Db::table('article')->where([ ['id', '<', 50], ['title', 'like', '%张三%'] ])->select();
 $res = Db::table('article')->insert(['title'=>$title, 'content'=>$content, 'user_id'=>$uid]);
+
 //获取单个数据，下面真实执行语句： SELECT `title` FROM `article` WHERE `id`=50 LIMIT 0,1  
 $title = Db::table('article')->where('id', 50)->value('title');
+
 //获取单行数据，返回的是一维数组 ['title'=>'标题', ...]
 $article = Db::table('article')->where('id', 50)->select('*', false);
+
 //更新 id<50 的行进行更新，返回受影响条数
 $res = Db::table('article')->where('id', '<', 50)->update(['title'=>'newTitle']);
+
 //和上面执行一样，第2个参数为更新白名单，不存在白名单不更新
 $res = Db::table('article')->where('id', '<', 50)->update($_POST, 'title');
+
 //删除，默认条件下必须设置where才可以删除，否则报错；如果要强制无条件删除，设置 ->delete(true)
 $res = Db::table('article')->where('id', '<', 50)->delete();
 
