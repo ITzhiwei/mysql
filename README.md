@@ -43,4 +43,4 @@ Db::crateSqlObj($config);
 //经典用法
 
 ?>
-```
+```         
