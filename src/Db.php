@@ -227,7 +227,7 @@ class Db{
                 $res = self::$sqlStr;
             }
             $config = self::$config;
-            if($config['readSelectMaster'] && $config['deploy'] == 1){
+            if($config['readSelectMaster'] && $config['deploy'] == 1 && $config['rwSeparate']){
                 //多个服务器下并开启了一旦写了数据库某个表，这个表的后续操作都在 self::$writeMysql 里面进行
                 $thisObj = self::getThisObj();
                 $table = $thisObj->table;
