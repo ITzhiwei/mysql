@@ -210,3 +210,14 @@ $moneyAll = Db::table('users')->where(['name', '=', '张三'])->min('age');
 //获取最近一次合成的sql语句; 和 ->noQuery() 不同的地方在于 Db::$sqlStr 是获取最近合成的SQL语句，不管最近一次的SQL有没有真正执行
 $sqlStr = Db::$sqlStr;
 ```
+
+# 额外说明
+该库使用的是 mysqli 模式；  
+这里说说 **mysqli** 与 **PDO** 重要区别。  
+**兼容**：mysqli 仅支持 mysql 数据库，PDO 支持大部分数据库，PDO完胜；  
+**性能**：本人在 PHP7.3.5 + MYSQL5.7.25 环境测试下：  
+都是使用预处理模式操作最基本的insert和select，每次循环500次，运行10次计算数据平均值得出结果：  
+**insert**下，mysqli 仅比 PDO 快**1.59%**，基本可忽略。  
+**select**下，mysqli 比 PDO 快**18.84%**  
+由于PDO要兼容大部分数据库，所以性能上是不及mysqli的  
+若你的项目是仅使用 mysql 的同时追求毫秒级别的性能优化，那么 mysqli 模式或许更合适你
