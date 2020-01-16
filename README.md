@@ -24,6 +24,8 @@ $config = [//可将配置信息保存起来，以后无需配置就可直接使�
            'deploy'  => 0,  
            //数据库读写是否分离，分布式有效  
            'rwSeparate' => false,  
+           //在读写分离的环境下，是否开启一旦表有写操作，本次请求的后续操作涉及到该表的都使用写句柄进行操作，避免数据在读库尚未同步完成导致数据不一致
+           'readSelectMaster' => false,
            //从数据库，从数据库服务器只读不写；注意：只有在读写分离才将链接信息写在下面  
            'slaveHost' => [],  
            'slavePort' => [],  
@@ -211,7 +213,26 @@ $moneyAll = Db::table('users')->where(['name', '=', '张三'])->min('age');
 //获取最近一次合成的sql语句; 和 ->noQuery() 不同的地方在于 Db::$sqlStr 是获取最近合成的SQL语句，不管最近一次的SQL有没有真正执行
 $sqlStr = Db::$sqlStr;
 ```
-
+# 读写分离
+```
+'deploy'  => 1,
+'rwSeparate' => true,
+//一维数组，有多少个host写多少个值在数组里面，下同
+'slaveHost' => [...],
+'slavePort' => [...],
+'slaveDatabase' => [...],
+'slaveUsername' => [...],
+'slavePassword' => [...]'
+```
+某些环境需要直接从写库（主库）中读取数据，如刚进行写操作（插入或更新）时，读库（从库）数据还没同步完成，你可以使用->master()，如：
+```
+Db::table('users')->where('id', 1)->update(['name' => 'lipowei']);
+$name = Db::table('users')->master()->where('id', 1)->value('name');
+```
+如果你嫌麻烦，可以配置一个参数：如果某表进行了写操作，本次请求的后续查询操作都会强制使用主库进行查询。
+```
+'readSelectMaster' => true
+```
 # 额外说明
 该库使用的是 mysqli 模式；  
 这里说说 **mysqli** 与 **PDO** 重要区别。  
