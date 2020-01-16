@@ -124,7 +124,7 @@ class Db{
      * @return object mysqlConnect
      */
     protected static function mysqli($sqlStr = 'insert'){
-        $sqlCDUS = substr(trim($sqlStr), 0, 6);
+        $sqlCDUS = strtolower(substr(trim($sqlStr), 0, 6));
         $config = self::$config;
         if(empty($config)){
             $configFileName = self::$configFileName;
@@ -195,7 +195,11 @@ class Db{
             self::$sqlDebug = $connectConfig['sqlDebug'];
         };
         if($type == 'write'){
-            $writeNum = array_rand($connectConfig['host']);
+            if($connectConfig['deploy'] == 1) {
+                $writeNum = array_rand($connectConfig['host']);
+            }else{
+                $writeNum = 0;
+            }
             $sqlObj = new \mysqli($connectConfig['host'][$writeNum], $connectConfig['username'][$writeNum], $connectConfig['password'][$writeNum], $connectConfig['database'][$writeNum], $connectConfig['port'][$writeNum]);
         }else{
             $readNum = array_rand($connectConfig['slaveHost']);
@@ -223,7 +227,7 @@ class Db{
             $sqlStr = trim($sqlStr);
             self::$sqlStr = $sqlStr.'  参数：'.json_encode($params, JSON_UNESCAPED_UNICODE);
             if(self::$sqlQuery) {
-                $sqlCDUS = substr($sqlStr, 0, 6);
+                $sqlCDUS = strtolower(substr($sqlStr, 0, 6));
                 $paramsCount = count($params);
                 if ($paramsCount > 0 && is_array($params)) {
                     $stmt = self::stmtPrepare($sqlStr, $params, $type);
