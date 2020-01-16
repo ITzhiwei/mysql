@@ -138,14 +138,36 @@ class Db{
             self::crateSqlObj($config, 'write');
         }
         if($config['deploy'] == 1 && $config['rwSeparate']){
-                if($sqlCDUS == 'select' && self::$selectMasterSql == false){
-                    return self::$readMysql;
+            //self::$selectMasterSql  是主动选择主库操作
+            if($sqlCDUS == 'select' && self::$selectMasterSql == false){
+                //readSelectMaster 开启了一但在多mysql服务的读写分离环境下，若那个表执行了写操作，该表的后续操作都在写句柄执行
+                $thisObj = self::getThisObj();
+                $table = $thisObj->table;//原生执行table=null，不支持写库读取模式
+                if($config['readSelectMaster'] && self::$selectMasterSqlTable != [] && $table !== null){
+                    $nawTable = self::getTableName($table);
+                    $bool = false;
+                    $oldTableArr = self::$selectMasterSqlTable;
+                    foreach ($nawTable as $key=>$value){
+                        if(in_array($value, $oldTableArr)){
+                            $bool = true;
+                            break;
+                        }
+                    }
+                    if($bool){
+                        //该表在本次程序执行中有过写操作，所以后续强制使用写句柄继续操作
+                        return self::$writeMysql;
+                    }else{
+                        return self::$readMysql;
+                    }
                 }else{
-                    return self::$writeMysql;
+                    return self::$readMysql;
                 }
-        }else{
-                //只有一个mysql模式
+            }else{
                 return self::$writeMysql;
+            }
+        }else{
+            //只有一个mysql模式
+            return self::$writeMysql;
         }
     }
 
@@ -227,19 +249,18 @@ class Db{
                 $res = self::$sqlStr;
             }
             $config = self::$config;
+            $thisObj = self::getThisObj();
             if($config['readSelectMaster'] && $config['deploy'] == 1 && $config['rwSeparate']){
                 //多个服务器下并开启了一旦写了数据库某个表，这个表的后续操作都在 self::$writeMysql 里面进行
-                $thisObj = self::getThisObj();
                 $table = $thisObj->table;
                 if($table !== null){
                     //识别 table 里面的表名，提取出来放到 slef::$selectMasterSqlTable 里面去
-                    $tableArr = self::getTableName();
+                    $tableArr = self::getTableName($table);
                     $tableArrOld = self::$selectMasterSqlTable;
                     self::$selectMasterSqlTable = array_merge($tableArr, $tableArrOld);
                 }
-                $thisObj->table = null;
             }
-
+            $thisObj->table = null;
             return $res;
      }
 
@@ -247,8 +268,19 @@ class Db{
      * 从 $this->table 中提取表名并返回
      * @return array
      */
-    protected static function getTableName(){
-         return [];
+    protected static function getTableName($table){
+        $arr = explode(' ', $table);
+        $tableArr = [];
+        foreach ($arr as $key=>$value){
+            if($tableArr == []){
+                $tableArr[] = $value;
+            }else{
+                if($value == 'join'){
+                    $tableArr[] = $arr[$key+1];
+                }
+            }
+        }
+        return $tableArr;
     }
 
     /**
@@ -285,18 +317,21 @@ class Db{
                         $data[] = $thisData;
                     }
                     $stmt->close();
-                    return $data;
+                    $return = $data;
                 } else {
-                    return [];
+                    $return = [];
                 }
             } else {
                 //无参数绑定，不使用预处理
                 $query = self::mysqliQuery($sqlStr);
-                return self::assemblyData($query);
+                $return = self::assemblyData($query);
             }
         }else{
-            return self::$sqlStr;
+            $return = self::$sqlStr;
         }
+        $thisObj = self::getThisObj();
+        $thisObj->table = null;
+        return $return;
     }
 
     /**
@@ -441,7 +476,7 @@ class Db{
     /**
      * 部分数据恢复初始化
      */
-    protected function closeParamStr($table){
+    protected function closeParamStr(){
         $this->whereStr = '';
         $this->whereValue = [];
         $this->limitStr = '';
@@ -450,6 +485,7 @@ class Db{
         $this->havingStr = '';
         self::$sqlQuery = true;
         self::$selectMasterSql = false;
+        //$this->table = null;//这个分布式中可能会用到，所以在::write及::read中还原
     }
 
     /**
@@ -687,6 +723,7 @@ class Db{
                                             'deploy'  => {$connectConfigStr['deploy']},
                                             //数据库读写是否分离，分布式有效；可以不读写分离，随机使用host里面的mysql数据库，负载均衡
                                             'rwSeparate' => $rwSeparate,
+                                            //在读写分离的环境下，是否开启一旦表有写操作，本次请求的后续操作涉及到该表的都使用写句柄进行操作，避免数据在读库尚未同步完成导致数据不一致
                                             'readSelectMaster' => $readSelectMaster,
                                             //从数据库，从数据库服务器只读不写；注意：只有在读写分离才将链接信息写在下面
                                             'slaveHost' => {$connectConfigStr['slaveHost']},
