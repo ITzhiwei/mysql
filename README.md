@@ -213,11 +213,19 @@ $moneyAll = Db::table('users')->where(['name', '=', '张三'])->min('age');
 //获取最近一次合成的sql语句; 和 ->noQuery() 不同的地方在于 Db::$sqlStr 是获取最近合成的SQL语句，不管最近一次的SQL有没有真正执行
 $sqlStr = Db::$sqlStr;
 ```
+# 多数据库分布式
+如果都是可读可写的，将信息写在host系列里面去即可，如:
+```
+'host' => ['192.168.1.1', '192.168.1.2' ...],
+'username'=>['root', 'root' ...],
+...
+'deploy' => 1
+```
 # 读写分离
 ```
 'deploy'  => 1,
 'rwSeparate' => true,
-//一维数组，有多少个host写多少个值在数组里面，下同
+//一维数组，有多少个写多少个值在数组里面，下同
 'slaveHost' => [...],
 'slavePort' => [...],
 'slaveDatabase' => [...],
