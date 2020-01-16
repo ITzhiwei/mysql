@@ -1,4 +1,4 @@
-#php mysql 防SQL注入预处理封装库
+# php mysql 防SQL注入预处理封装库
 # 版本支持
 php5.4、5.5、5.6、7.*
 # 安装
