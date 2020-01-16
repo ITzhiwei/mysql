@@ -2,7 +2,7 @@
 php5.4、5.5、5.6、7.*
 # 安装
 composer require lipowei/db
-# 使用（支持主从分布读写分离）
+# 使用（支持分布式读写分离，可自动保存配置，无需初始化）
 引入 vendor 目录下的 autoload.php  
 ```
 <?php
