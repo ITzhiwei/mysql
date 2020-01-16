@@ -1,3 +1,4 @@
+#php mysql 防SQL注入预处理封装库
 # 版本支持
 php5.4、5.5、5.6、7.*
 # 安装
@@ -16,7 +17,7 @@ $config = [//可将配置信息保存起来，以后无需配置就可直接使�
            'database' => ['test'],  
            'username' => ['root'],  
            'password' => [''],  
-           //比utf8不支持小表情存数据库  
+           //utf8mb4相对utf8来说，utf8mb4支持emoji，但占的内存大一点
            'charset' => 'utf8mb4',  
            //是否显示SQL错误信息  
            'sqlDebug' => true,  
@@ -173,6 +174,15 @@ $id = Db::$insertId;
 * $all 和 delete() 中的一样，防止不小心整表更新，若要强制删除整表数据，$all 传 true 即可  
 * $type 一般来说无需理会，想了解的可以看源码  
 * 返回的结果是更新的行数
+```
+更新系列操作的还有自增和自减操作
+Db::table('users')->where('id', 1)->setInc('money');//用户余额+1
+Db::table('users')->where('id', 1)->setInc('money', 5);//用户余额+5
+Db::table('users')->where('id', 1)->setDec('money');//用户余额-1
+Db::table('users')->where('id', 1)->setDec('money', 5);//用户余额-5
+如没有设置 where，会被拦截并中断程序执行，如果需要强制整表更新，传入第3个参数为true，如：
+Db::table('users')->setInc('money', 5, true);//全部用户的余额增加5
+```
 
 **->select($field = '\*', $more = true)**  
 * $field 是需要查询的字段，默认是所有，即\*   
