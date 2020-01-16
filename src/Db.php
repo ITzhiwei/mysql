@@ -279,7 +279,7 @@ class Db{
             if($tableArr == []){
                 $tableArr[] = $value;
             }else{
-                if($value == 'join'){
+                if($value == 'JOIN'){
                     $tableArr[] = $arr[$key+1];
                 }
             }
