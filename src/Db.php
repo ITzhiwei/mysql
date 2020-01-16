@@ -84,7 +84,7 @@ class Db{
      * 当前存储的预处理参数，不只是where中的数据，还有其他地方的也放到该处
      * @var array
      */
-    protected $whereValue = [];
+    public $whereValue = [];
     /**
      * 存放当前拼接的limit语句
      * @var string
@@ -1230,6 +1230,45 @@ class Db{
             return $res[0]['num'];
         }else{
             return $res;
+        }
+    }
+
+    /**
+     * @param string $field
+     * @param int $num
+     * @return int 返回0表示更新失败，反之返回执行更新的行数
+     */
+    public function setInc($field, $num = 1, $all = false){
+        return $this->fieldIncOrDec($field, $num, '+', $all);
+    }
+
+    /**
+     * @param string $field
+     * @param int $num
+     * @return int 返回0表示更新失败，反之返回执行更新的行数
+     */
+    public function setDec($field, $num = 1, $all = false){
+        return $this->fieldIncOrDec($field, $num, '-', $all);
+    }
+
+    /**
+     * @param string $field
+     * @param int $num
+     * @param string $type
+     * @return int
+     */
+    protected function fieldIncOrDec($field, $num, $type, $all){
+        $num = (int)$num;
+        $field = self::transform($field);
+        $table = $this->table;
+        $where = $this->whereStr;
+        if($where == '' && $all == false){
+            echo '更新数值需要条件，请设置 ->where() ;若要强制更新整个表，请传入第3个参数为 true';
+            exit;
+        }else{
+            $sqlStr = "UPDATE $table SET $field=$field{$type}$num $where";
+            $thisObj = self::getThisObj();
+            return self::write($sqlStr, $thisObj->whereValue);
         }
     }
     
