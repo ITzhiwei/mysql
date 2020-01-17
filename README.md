@@ -89,6 +89,15 @@ Db::transaction(function(){
   这样 $tableString 就很灵活了，而且不管你怎么写，都会自动加反引号。  
 * $transform，是否为 $tableString 自动添加反引号。如果你确保自己不需要加反引号，可以设置为 false  
 
+**JOIN表相关**
+```
+所有的表关联都可直接写在 table() 内，可自动识别加反引号，方便快捷，如：
+Db::table('article left join article_seo on(article.id=article_seo.article_id)')
+Db::table('article inner join article_seo on(article.id=article_seo.article_id)')
+Db::table('article right join article_seo on(article.id=article_seo.article_id)')
+Db::table('article a left join article_seo b on(a.id=b.article_id)')
+```
+
 **->where($where, $conditionOrValue = null, $value = null)**  
 * where 可以仅接受1个参数，这个参数必须是数组，一维数组或二维数组  
  一维数组，如果是3个值，那么中间是作为条件，如：['name', '=', '张三']，俩个值则条件为"="号['name', '张三']  
