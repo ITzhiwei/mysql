@@ -24,7 +24,7 @@ class Db{
      * 错误日志存放目录; vendor的同级目录log下的mysql目录
      * @var string
      */
-    public static $logDir = __DIR__.'/../../../../log/mysql/';
+    public static $logDir = '/../../../../log/mysql/';
 
     /**
      * 配置信息
@@ -622,6 +622,9 @@ class Db{
             $errorLog2 .= "\r\nPOST:" . json_encode($_POST, JSON_UNESCAPED_UNICODE);
         };
         $logDir = self::$logDir;
+        if($logDir === '/../../../../log/mysql/'){
+            $logDir = __DIR__.$logDir;
+        }
         if(!is_dir($logDir)){
             mkdir($logDir, 0777, true);
         };
@@ -1166,7 +1169,7 @@ class Db{
      */
     public function value($field){
         $res = $this->select($field, false);
-        if(!empty($res[$field])){
+        if(isset($res[$field])){
             return $res[$field];
         }else{
             return false;
