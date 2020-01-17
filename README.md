@@ -95,7 +95,7 @@ Db::transaction(function(){
 Db::table('article left join article_seo on(article.id=article_seo.article_id)')
 Db::table('article inner join article_seo on(article.id=article_seo.article_id)')
 Db::table('article right join article_seo on(article.id=article_seo.article_id)')
-Db::table('article a left join article_seo b on(a.id=b.article_id)')
+Db::table('article a left join article_seo b on(a.id=b.article_id) left join users c on(a.user_id=c.id)')
 ```
 
 **->where($where, $conditionOrValue = null, $value = null)**  
