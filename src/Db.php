@@ -21,7 +21,7 @@ class Db{
     public static $configFileName = 'lipoweiDB';
 
     /**
-     * 错误日志存放目录; vendor的同级目录log下的mysql目录
+     * 错误日志存放目录; vendor的同级目录log下的mysql目录，如果是 /../../../../log/mysql/ ，会自动在前面加上 __DIR__，不在这里加__DIR__，是为了兼容
      * @var string
      */
     public static $logDir = '/../../../../log/mysql/';
