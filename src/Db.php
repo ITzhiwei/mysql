@@ -828,7 +828,7 @@ class Db{
         $strArr = explode(' ', $str);
         $newStr = '';
         foreach($strArr as $key=>$value){
-            if($value != ' ') {
+            if($value != '') {
                 if ($value != 'as') {
                     $newStr .= ' ' . self::transform($value, $search);
                 } else {
