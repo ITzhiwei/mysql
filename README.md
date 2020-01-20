@@ -99,12 +99,20 @@ Db::table('article a left join article_seo b on(a.id=b.article_id) left join use
 ```
 
 **->where($where, $conditionOrValue = null, $value = null)**  
-* where 可以仅接受1个参数，这个参数必须是数组，一维数组或二维数组  
+* where() 可以仅接受1个参数，这个参数必须是数组，一维数组或二维数组  
  一维数组，如果是3个值，那么中间是作为条件，如：['name', '=', '张三']，俩个值则条件为"="号['name', '张三']  
  二维数组，可以传入多个值，如：[ ['name', '张三'], ['age', '>', 18] ] //WHERE \`name\`='张三' AND \`age\`>18  
 
-* where 可以传入 $conditionOrValue 和 $value 如：  
-  ->where('name', '张三') 或者 ->where('name', '=', '张三')
+* where() 可以传入 $conditionOrValue 和 $value 如：  
+  ->where('name', '张三') 或者 ->where('name', '=', '张三')  
+  
+* where() 对 IN 、NOT IN、BETWEEN 、NOT BETWEEN 的支持，用法：
+```
+  ->where('id', 'IN', [1,2,3,4])       或 ->where([ ['id', 'IN', [1,2,3,4]] ])
+  ->where('id', 'NOT IN', [1,2,3,4])   或 ->where([ ['id', 'IN', [1,2,3,4]] ])
+  ->where('id', 'BETWEEN', [1,3])      或 ->where([ ['id', 'BETWEEN', [1,3]] ])
+  ->where('id', 'NOT BETWEEN', [1,3])  或 ->where([ ['id', 'NOT BETWEEN', [1,3]] ])
+```
 
 **->whereOr($where, $conditionOrValue = null, $value = null)**  
 * 三个参数和->where一样，说说不同的地方  
