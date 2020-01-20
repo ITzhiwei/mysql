@@ -828,10 +828,12 @@ class Db{
         $strArr = explode(' ', $str);
         $newStr = '';
         foreach($strArr as $key=>$value){
-            if(strtolower($value) != 'as'){
-                $newStr .= ' '.self::transform($value, $search);
-            }else{
-                $newStr .= ' AS';
+            if($value != ' ') {
+                if ($value != 'as') {
+                    $newStr .= ' ' . self::transform($value, $search);
+                } else {
+                    $newStr .= ' AS';
+                }
             }
         }
         return $newStr;
