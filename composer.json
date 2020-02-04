@@ -1,6 +1,6 @@
 {
     "name": "lipowei/db",
-    "description": "mysql 数据库操作；安全：全程预处理模式防SQL注入，自动添加反引号防表字段与关键词冲突；支持主从分布，支持配置参数保存；本类库注释多，可供学习使用；",
+    "description": "mysql 数据库操作；安全：全程预处理模式防SQL注入，自动添加反引号防表字段与关键词冲突；支持主从分布，支持配置参数保存；",
     "type": "library",
     "license": "MIT",
     "version": "1.2",
