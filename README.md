@@ -1,6 +1,6 @@
 # php mysql 防SQL注入预处理封装库
 # 版本支持
-php5.4、5.5、5.6、7.*
+php5.6、7.*
 # 安装
 composer require lipowei/db
 # 使用（支持分布式读写分离，可自动保存配置，无需初始化）
