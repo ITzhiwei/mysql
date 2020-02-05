@@ -16,7 +16,8 @@
         }
     ],
     "require": {
-        "lipowei/config": "^1.0"
+        "lipowei/config": "^1.0",
+        "php": ">=5.6.0"
     }
 }
 
