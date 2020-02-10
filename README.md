@@ -56,8 +56,8 @@ $res = Db::table('article')->insert(['title'=>$title, 'content'=>$content, 'user
 //获取单个数据，下面真实执行语句： SELECT `title` FROM `article` WHERE `id`=50 LIMIT 0,1  
 $title = Db::table('article')->where('id', 50)->value('title');
 
-//获取单行数据，返回的是一维数组 ['title'=>'标题', ...] , $field 是需要查询的字段，如 $field = 'title,content' 或 '*'
-$article = Db::table('article')->where('id', 50)->find($field);
+//获取单行数据，返回的是一维数组 ['title'=>'标题', 'content'=>'文章内容']
+$article = Db::table('article')->where('id', 50)->find('title,content');
 
 //更新 id<50 的行进行更新，返回受影响条数
 $res = Db::table('article')->where('id', '<', 50)->update(['title'=>'newTitle']);
@@ -204,6 +204,10 @@ Db::table('users')->setInc('money', 5, true);//全部用户的余额增加5
 **->select($field = '\*', $more = true)**  
 * $field 是需要查询的字段，默认是所有，即\*   
 * $more 默认为true，查询多行，返回二位数组结果集，设置为false时即为查询单行，即 LIMIT 0,1  返回一维数组结果集 
+
+**->find($field = '\*')**
+* 注：find 是单行查询，效果等同 ->select($field, false)
+* $field 是需要查询的字段，默认是所有，即\*   
 
 **->value($field)**
 ```
