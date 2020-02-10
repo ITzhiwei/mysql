@@ -1206,6 +1206,10 @@ class Db{
         return $res;
     }
 
+    public function find($field = '*'){
+        return $this->select($field, false);
+    }
+
     /**
      * @param string $field 需要查询的字段
      * @return mixed|false 如果存在所查询的值则返回值，否则返回false
