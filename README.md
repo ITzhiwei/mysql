@@ -56,8 +56,8 @@ $res = Db::table('article')->insert(['title'=>$title, 'content'=>$content, 'user
 //获取单个数据，下面真实执行语句： SELECT `title` FROM `article` WHERE `id`=50 LIMIT 0,1  
 $title = Db::table('article')->where('id', 50)->value('title');
 
-//获取单行数据，返回的是一维数组 ['title'=>'标题', ...]
-$article = Db::table('article')->where('id', 50)->select('*', false);
+//获取单行数据，返回的是一维数组 ['title'=>'标题', ...] , $field 是需要查询的字段，如 $field = 'title,content' 或 '*'
+$article = Db::table('article')->where('id', 50)->find($field);
 
 //更新 id<50 的行进行更新，返回受影响条数
 $res = Db::table('article')->where('id', '<', 50)->update(['title'=>'newTitle']);
