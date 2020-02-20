@@ -1338,7 +1338,7 @@ class Db{
     }
     
     /**
-     * @param $field
+     * @param string|array $field string例子：->order('id', 'DESC')  array例子：->order(['time'=>'DESC', 'id'=>'DESC'])  简便模式：->order(['time', 'id'], 'DESC') 如果第2个参数不填写默认为ASC
      * @param string:default:asc $rank 如果设置为 false ,则可以使用自定义排序：$field=FIELD(fieldName, 'li', 'po', 'wei') ASC
      * @return $this
      */
@@ -1347,13 +1347,13 @@ class Db{
             $orderStr = 'ORDER BY ';
             $i = 1;
             foreach ($field as $key=>$value){
-                if($key === 0){
+                if( is_int($key) ){
                     $value = self::transform($value);
                     if($i == 1){
-                        $orderStr .= "$value ASC ";
+                        $orderStr .= "$value $rank ";
                         $i = 2;
                     }else{
-                        $orderStr .= ",$value ASC ";
+                        $orderStr .= ",$value $rank ";
                     }
                 }else{
                     $key = self::transform($key);

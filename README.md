@@ -147,9 +147,19 @@ Db::table('article a left join article_seo b on(a.id=b.article_id) left join use
 * $length 取多少行数据  
 
 **order($field, $rank = 'ASC')**
-* string|array $field string:参与排序的字段 array:['num'=>'ASC', 'id'=>'ASC']
+* string|array $field string例子：->order('id', 'DESC')
 * string:default:asc $rank 如果设置为 false ,则可以使用自定义排序：$field = "FIELD('id', 7, 9, 5) ASC"
-
+```
+//字符串模式例子
+->order('time', 'desc');
+//数组模式例子
+DESC：
+->order(['time'=>'desc']) 或者 ->order(['time'], 'DESC')
+->order(['time'=>'desc'， 'id'=>'desc']) 或者 ->order(['time', 'id'], 'DESC')
+ASC：
+->order(['time']) 效果： time ASC
+->order(['time'， 'id']) 效果： time ASC,id ASC
+```
 **->group($group)**  
 * $group 字符串或数组，单个字段分组时使用字符串，多个字段分组使用数组
 
