@@ -918,7 +918,7 @@ class Db{
      */
     protected function whereOrAnd($where, $type = 'AND', $conditionOrValue = null, $value = null){
         if(is_array($where)){
-            if(is_array($where[0])){
+            if(isset($where[0])){
                 //二维数组模式
                 $whereStr = '';
                 foreach($where as $key=>$value){
@@ -967,6 +967,7 @@ class Db{
      * @return string
      */
     protected function whereArrToStr($where){
+        $whereStr = '';
         foreach ($where as $key=>$value){
             if(is_int($key)){
                 if(count($where) == 3){
@@ -1021,7 +1022,11 @@ class Db{
                 }
             }else{
                 //[key=>value]模式
-                $whereStr = self::transform($key).'=?';
+                if($whereStr == '') {
+                    $whereStr = self::transform($key) . '=?';
+                }else{
+                    $whereStr =  $whereStr . ' AND ' . self::transform($key) . '=?';
+                }
                 $this->whereValue[] = $value;
             }
         }
