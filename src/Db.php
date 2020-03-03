@@ -975,9 +975,9 @@ class Db{
                     $where[1] = str_replace(["\r\n", "\r", "\n", ' '], ' ', strtoupper(trim($where[1])));
                     if(strstr($where[1], ' ')) {
                         $where1Arr = explode(' ', $where[1]);
-                        foreach ($where1Arr as $key=>$value){
-                            if($value == ''){
-                                unset($where1Arr[$key]);
+                        foreach ($where1Arr as $k=>$v){
+                            if($v == ''){
+                                unset($where1Arr[$k]);
                             }
                         }
                         $where[1] = implode(' ', $where1Arr);
@@ -988,8 +988,8 @@ class Db{
                         if($where[1] == 'IN' || $where[1] == 'NOT IN') {
                             if (is_array($where[2])) {
                                 $whereStr = '(';
-                                foreach ($where[2] as $key => $value) {
-                                    $this->whereValue[] = $value;
+                                foreach ($where[2] as $k => $v) {
+                                    $this->whereValue[] = $v;
                                     if ($whereStr == '(') {
                                         $whereStr .= '?';
                                     } else {
