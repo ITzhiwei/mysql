@@ -918,7 +918,7 @@ class Db{
      */
     protected function whereOrAnd($where, $type = 'AND', $conditionOrValue = null, $value = null){
         if(is_array($where)){
-            if(isset($where[0])){
+            if(isset($where[0]) && is_array($where[0])){
                 //二维数组模式
                 $whereStr = '';
                 foreach($where as $key=>$value){
@@ -947,7 +947,7 @@ class Db{
                 $where = $this->whereArrToStr($where);
             }
         }
-        
+
         if($this->whereStr == ''){
             //如果$type = OR，传入二维数组得到结果是：WHERE (`name`='张三' OR `nickname`='张三')
             $this->whereStr = 'WHERE '.$where;
@@ -967,70 +967,70 @@ class Db{
      * @return string
      */
     protected function whereArrToStr($where){
-        $whereStr = '';
-        foreach ($where as $key=>$value){
-            if(is_int($key)){
-                if(count($where) == 3){
-                    //[key, 符号, value] 模式
-                    $where[1] = str_replace(["\r\n", "\r", "\n", ' '], ' ', strtoupper(trim($where[1])));
-                    if(strstr($where[1], ' ')) {
-                        $where1Arr = explode(' ', $where[1]);
-                        foreach ($where1Arr as $k=>$v){
-                            if($v == ''){
-                                unset($where1Arr[$k]);
-                            }
+        $oneKey = key($where);
+        if(is_int($oneKey)) {
+            if (count($where) == 3) {
+                //[key, 符号, value] 模式
+                $where[1] = str_replace(["\r\n", "\r", "\n", ' '], ' ', strtoupper(trim($where[1])));
+                if (strstr($where[1], ' ')) {
+                    $where1Arr = explode(' ', $where[1]);
+                    foreach ($where1Arr as $key => $value) {
+                        if ($value == '') {
+                            unset($where1Arr[$key]);
                         }
-                        $where[1] = implode(' ', $where1Arr);
                     }
-                    $where1Arr = ['IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN'];
-                    if(in_array($where[1], $where1Arr)){
-                        //IN NOT IN 模式下只支持数组，不然不进行预处理
-                        if($where[1] == 'IN' || $where[1] == 'NOT IN') {
-                            if (is_array($where[2])) {
-                                $whereStr = '(';
-                                foreach ($where[2] as $k => $v) {
-                                    $this->whereValue[] = $v;
-                                    if ($whereStr == '(') {
-                                        $whereStr .= '?';
-                                    } else {
-                                        $whereStr .= ',?';
-                                    }
-                                }
-                                $whereStr .= ')';
-                            } else {
-                                $whereStr = $where[2];
-                            }
-                        }else{
-                            //BETWEEN  、 NOT BETWEEN模式
-                            if (is_array($where[2])) {
-                                $whereStr = '? AND ?';
-                                $this->whereValue[] = $where[2][0];
-                                $this->whereValue[] = $where[2][1];
-                            }else{
-                                $whereStr = $where[2];
-                            }
-                        }
-                        $whereStr = self::transform($where[0]) . ' ' . $where[1] . $whereStr;
-                    }else{
-                        $whereStr = self::transform($where[0]).' '.$where[1].' ?';
-                        $this->whereValue[] = $where[2];
-                    }
-                }elseif(count($where) == 2){
-                    // [key, value]key=value模式
-                    $whereStr = self::transform($where[0]).'=?';
-                    $this->whereValue[] = $where[1];
+                    $where[1] = implode(' ', $where1Arr);
                 }
-            }else{
-                //[key=>value]模式
-                if($whereStr == '') {
+                $where1Arr = ['IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN'];
+                if (in_array($where[1], $where1Arr)) {
+                    //IN NOT IN 模式下只支持数组，不然不进行预处理
+                    if ($where[1] == 'IN' || $where[1] == 'NOT IN') {
+                        if (is_array($where[2])) {
+                            $whereStr = '(';
+                            foreach ($where[2] as $key => $value) {
+                                $this->whereValue[] = $value;
+                                if ($whereStr == '(') {
+                                    $whereStr .= '?';
+                                } else {
+                                    $whereStr .= ',?';
+                                }
+                            }
+                            $whereStr .= ')';
+                        } else {
+                            $whereStr = $where[2];
+                        }
+                    } else {
+                        //BETWEEN  、 NOT BETWEEN模式
+                        if (is_array($where[2])) {
+                            $whereStr = '? AND ?';
+                            $this->whereValue[] = $where[2][0];
+                            $this->whereValue[] = $where[2][1];
+                        } else {
+                            $whereStr = $where[2];
+                        }
+                    }
+                    $whereStr = self::transform($where[0]) . ' ' . $where[1] . $whereStr;
+                } else {
+                    $whereStr = self::transform($where[0]) . ' ' . $where[1] . ' ?';
+                    $this->whereValue[] = $where[2];
+                }
+            } elseif (count($where) == 2) {
+                // [key, value]key=value模式
+                $whereStr = self::transform($where[0]) . '=?';
+                $this->whereValue[] = $where[1];
+            }
+        }else{
+            $whereStr = '';
+            //[key=>value]模式
+            foreach ($where as $key=>$value) {
+                if ($whereStr == '') {
                     $whereStr = self::transform($key) . '=?';
-                }else{
-                    $whereStr =  $whereStr . ' AND ' . self::transform($key) . '=?';
+                } else {
+                    $whereStr = $whereStr . ' AND ' . self::transform($key) . '=?';
                 }
                 $this->whereValue[] = $value;
             }
         }
-
         return $whereStr;
     }
     
