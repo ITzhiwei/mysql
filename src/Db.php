@@ -142,7 +142,7 @@ class Db{
                 //readSelectMaster 开启了一但在多mysql服务的读写分离环境下，若那个表执行了写操作，该表的后续操作都在写句柄执行
                 $thisObj = self::getThisObj();
                 $table = $thisObj->table;//原生执行table=null，不支持写库读取模式
-                if($config['readSelectMaster'] && self::$selectMasterSqlTable != [] && $table !== null){
+                if(isset($config['readSelectMaster']) && $config['readSelectMaster'] && self::$selectMasterSqlTable != [] && $table !== null){
                     $nawTable = self::getTableName($table);
                     $bool = false;
                     $oldTableArr = self::$selectMasterSqlTable;
@@ -266,7 +266,7 @@ class Db{
             }
             $config = self::$config;
             $thisObj = self::getThisObj();
-            if($config['readSelectMaster'] && $config['deploy'] == 1 && $config['rwSeparate']){
+            if( $config['deploy'] == 1 && isset($config['readSelectMaster']) && $config['readSelectMaster'] && $config['rwSeparate'] ){
                 //多个服务器下并开启了一旦写了数据库某个表，这个表的后续操作都在 self::$writeMysql 里面进行
                 $table = $thisObj->table;
                 if($table !== null){
