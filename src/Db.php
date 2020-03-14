@@ -1301,7 +1301,7 @@ class Db{
         if(isset($res[0]['num'])){
             return $res[0]['num'];
         }else{
-            return $res;
+            return 0;
         }
     }
 
