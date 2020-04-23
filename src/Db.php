@@ -1307,7 +1307,7 @@ class Db{
 
     /**
      * @param string $field
-     * @param int $num
+     * @param int|float $num
      * @return int 返回0表示更新失败，反之返回执行更新的行数
      */
     public function setInc($field, $num = 1, $all = false){
@@ -1316,7 +1316,7 @@ class Db{
 
     /**
      * @param string $field
-     * @param int $num
+     * @param int|float $num
      * @return int 返回0表示更新失败，反之返回执行更新的行数
      */
     public function setDec($field, $num = 1, $all = false){
@@ -1325,12 +1325,12 @@ class Db{
 
     /**
      * @param string $field
-     * @param int $num
+     * @param int|float $num
      * @param string $type
      * @return int
      */
     protected function fieldIncOrDec($field, $num, $type, $all){
-        $num = (int)$num;
+        $num = (float)$num;
         $field = self::transform($field);
         $table = $this->table;
         $where = $this->whereStr;
