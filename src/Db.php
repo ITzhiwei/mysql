@@ -1090,7 +1090,6 @@ class Db{
             }
             $array = $this->safe($array, $columns);
         }
-
         $keyStr = '';
         $valueaStr = '';
         $i = 1;
@@ -1109,6 +1108,96 @@ class Db{
         $sqlStr = "INSERT INTO $table($keyStr) VALUES($valueaStr)";
         return self::write($sqlStr, $valueArr, $type);
     }
+
+    /**
+     * 多行数据插入
+     * @param array $array 二维数组，多行数据插入
+     * @param array $columns 一维数组，限制只能插入某些字段，空数组即为不限制
+     * @param bool $filter 是否自动排除不存在数据表内的字段（过滤非法字段，懒人操作防注入）
+     * @param null $type 各个字段在数据库内的数据类型
+     * @return int 插入条数。若要获取自增ID Db::$insertId
+     */
+    public function insertAll($array, $columns = [], $filter = false, $type = null){
+        if(empty($array[0])){
+            return $this->insert($array, $columns, $filter, $type);
+        }else{
+            //检测插入的key是否相同
+            $keyAllSame = true;
+            $oneKeyArr = false;
+            foreach($array as $key=>$value){
+                if($oneKeyArr === false){
+                    $oneKeyArr = array_keys($value);
+                }else{
+                    if(array_keys($value) !== $oneKeyArr){
+                        $keyAllSame = false;
+                        break;
+                    }
+                }
+            }
+            $table = $this->table;
+            if($keyAllSame){
+                if(empty($columns)){
+                    if($filter){
+                        foreach ($array as $key=>$value){
+                            $array[$key] =  $this->safe($value);
+                        }
+                    }
+                }else{
+                    if(!is_array($columns)){
+                        $columns = explode(',',$columns);
+                    }
+                    foreach ($array as $key=>$value){
+                        $array[$key] =  $this->safe($value, $columns);
+                    }
+                }
+
+                $keyStr = '';
+                $valueaStr = '(';//(?,?,?),(?,?,?)
+                $i = 1;
+                foreach ($oneKeyArr as $value){
+                    if($i==1){
+                        $keyStr = "`$value`";
+                        $i = 2;
+                    }else{
+                        $keyStr .= ",`$value`";
+                    }
+                    if($valueaStr == '('){
+                        $valueaStr .= '?';
+                    }else{
+                        $valueaStr .= ',?';
+                    }
+                }
+                $valueaStr .= ')';
+                $valueaOneStr = $valueaStr;
+                $valueaStr = '';
+                $valueArr = [];
+                foreach($array as $key=>$value){
+                    foreach ($value as $k=>$v){
+                        $valueArr[] = $v;
+                    }
+                    if($valueaStr){
+                        $valueaStr .= ','.$valueaOneStr;
+                    }else{
+                        $valueaStr = $valueaOneStr;
+                    }
+                }
+                $sqlStr = "INSERT INTO $table($keyStr) VALUES $valueaStr";
+                return self::write($sqlStr, $valueArr, $type);
+            }else{
+                //由于插入键值不一致，进行逐行插入
+                $insertNum = 0;
+                foreach ($array as $key=>$value){
+                    $this->table = $table;
+                    $status = $this->insert($value, $columns, $filter, $type);
+                    $insertNum += $status;
+                }
+                return $insertNum;
+            }
+        }
+
+
+    }
+
     
     /**
      * 删除  Db::table(...)->where(...)->delete()
@@ -1321,6 +1410,53 @@ class Db{
      */
     public function setDec($field, $num = 1, $all = false){
         return $this->fieldIncOrDec($field, $num, '-', $all);
+    }
+
+    /**
+     * @param array $fieldArr
+     * @param int|float|array $num 当$num非数组时，
+     * @param bool $all 当all为true时，where可以不设置，即无条件全表执行setInc
+     * @return int 返回0表示更新失败，反之返回执行更新的行数
+     */
+    public function setIncMany($fieldArr, $num = 1, $all = false){
+        return $this->setIncOrDecMany($fieldArr, $num, '+', $all);
+    }
+
+    /**
+     * @param array $fieldArr
+     * @param int|float|array $num 当$num非数组时，
+     * @param bool $all 当all为true时，where可以不设置，即无条件全表执行setInc
+     * @return int 返回0表示更新失败，反之返回执行更新的行数
+     */
+    public function setDecMany($fieldArr, $num = 1, $all = false){
+        return $this->setIncOrDecMany($fieldArr, $num, '-', $all);
+    }
+
+    protected function setIncOrDecMany($fieldArr, $num = 1, $type = '+', $all = false){
+        $setStr = '';
+        foreach ($fieldArr as $key=>$field) {
+            $field = self::transform($field);
+            if(is_array($num)){
+                $thisNum = (float)($num[$key]);
+            }else{
+                $thisNum = (float)$num;
+            }
+            if($setStr){
+                $setStr .= ','.$field.'='.$field.$type.$thisNum;
+            }else{
+                $setStr = $field.'='.$field.$type.$thisNum;
+            }
+        }
+        $table = $this->table;
+        $where = $this->whereStr;
+        if($where == '' && $all == false){
+            echo '更新数值需要条件，请设置 ->where() ;若要强制更新整个表，请传入第3个参数为 true';
+            exit;
+        }else{
+            $sqlStr = "UPDATE $table SET $setStr $where";
+            $thisObj = self::getThisObj();
+            return self::write($sqlStr, $thisObj->whereValue);
+        }
     }
 
     /**
