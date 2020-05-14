@@ -1074,7 +1074,7 @@ class Db{
      * 插入 Db::table(...)->insert(...)
      * @param array $array 一维关联数组，key为字段，value为值
      * @param array $columns 一维数组，限制只能插入某些字段，空数组即为不限制
-     * @param bool $filter 是否自动排除不存在数据表内的字段（过滤非法字段，懒人操作防注入）
+     * @param bool $filter 是否自动排除不存在数据表内的字段
      * @param null $type 各个字段在数据库内的数据类型
      * @return int 插入条数。若要获取自增ID Db::$insertId 
      */
@@ -1113,7 +1113,7 @@ class Db{
      * 多行数据插入
      * @param array $array 二维数组，多行数据插入
      * @param array $columns 一维数组，限制只能插入某些字段，空数组即为不限制
-     * @param bool $filter 是否自动排除不存在数据表内的字段（过滤非法字段，懒人操作防注入）
+     * @param bool $filter 是否自动排除不存在数据表内的字段
      * @param null $type 各个字段在数据库内的数据类型
      * @return int 插入条数。若要获取自增ID Db::$insertId
      */
