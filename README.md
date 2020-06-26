@@ -2,13 +2,13 @@
 # 版本支持
 php5.6、7.*
 # 安装
-composer require lipowei/db
+composer require tcwei/db
 # 使用（支持分布式读写分离，可自动保存配置，无需初始化）
 引入 vendor 目录下的 autoload.php  
 ```
 <?php
 require_once 'vendor/autoload.php';
-use lipowei\Db\Db;  
+use tcwei\Db\Db;  
 /** 初始化 **/
 $config = [//可将配置信息保存起来，以后无需配置就可直接使用：使用 Db::$configSave = true; + Db::crateSqlObj($config);下面有详细介绍 
            //主数据库，如果读写分离，主数据库服务器只写不读；如果读写不分离，将其他服务器的数据库链接信息加入host数组里面去就行了  
@@ -37,7 +37,7 @@ $config = [//可将配置信息保存起来，以后无需配置就可直接使�
 //将配置信息传入类
 Db::$config = $config;
 /** 当使用这俩行代码时，只需要执行一次，配置信息保存以后无需再进行任何初始化
-//重要：将配置信息保存到文件内，默认目录为 vendor 的同级目录 config 内的 lipoweiDB.php；如果不是使用 composer 安装的该DB库则无法使用，因为该功能有依赖
+//重要：将配置信息保存到文件内，默认目录为 vendor 的同级目录 config 内的 tcweiDB.php；如果不是使用 composer 安装的该DB库则无法使用，因为该功能有依赖
 Db::$configSave = true;
 Db::crateSqlObj($config);
 **/
@@ -288,7 +288,7 @@ $sqlStr = Db::$sqlStr;
 ```
 某些环境需要直接从写库（主库）中读取数据，如刚进行写操作（插入或更新）时，读库（从库）数据还没同步完成，你可以使用->master()，如：
 ```
-Db::table('users')->where('id', 1)->update(['name' => 'lipowei']);
+Db::table('users')->where('id', 1)->update(['name' => 'tcwei']);
 $name = Db::table('users')->master()->where('id', 1)->value('name');
 ```
 如果你嫌麻烦，可以配置一个参数：如果某表进行了写操作，本次请求的后续查询操作都会强制使用主库进行查询。

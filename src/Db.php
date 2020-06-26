@@ -4,12 +4,12 @@
 // +----------------------------------------------------------------------
 // | 版本支持：php5.4 5.5 5.6  PHP7.*
 // +----------------------------------------------------------------------
-// | Author: lipowei <2394599321@qq.com>
+// | Author: tcwei <2394599321@qq.com>
 // +----------------------------------------------------------------------
 
-namespace lipowei\Db;
-//lipowei\configClass\Config 只有通过 composer 下载安装才拥有该类
-use lipowei\configClass\Config;
+namespace tcwei\Db;
+//tcwei\configClass\Config 只有通过 composer 下载安装才拥有该类
+use tcwei\configClass\Config;
 
 
 class Db{
@@ -18,7 +18,7 @@ class Db{
      * 配置文件名，不包含后缀，后缀为".php"
      * @var string
      */
-    public static $configFileName = 'lipoweiDB';
+    public static $configFileName = 'tcweiDB';
 
     /**
      * 错误日志存放目录; vendor的同级目录log下的mysql目录，如果是 /../../../../log/mysql/ ，会自动在前面加上 __DIR__，不在这里加__DIR__，是为了兼容
@@ -641,7 +641,7 @@ class Db{
         if(!is_dir($logDir)){
             mkdir($logDir, 0777, true);
         };
-        $fileName = 'mysqlErrorLipowei'.substr($Logtime,0, 10);
+        $fileName = 'mysqlErrortcwei'.substr($Logtime,0, 10);
         $myfile = fopen($logDir."$fileName.txt", "a");
         fwrite($myfile, $errorLog2."\r\n\r\n\r\n");
         fclose($myfile);
