@@ -112,28 +112,31 @@ Db::table('article a left join article_seo b on(a.id=b.article_id) left join use
   ->where('id', 'NOT IN', [1,2,3,4])   或 ->where([ ['id', 'IN', [1,2,3,4]] ])
   ->where('id', 'BETWEEN', [1,3])      或 ->where([ ['id', 'BETWEEN', [1,3]] ])
   ->where('id', 'NOT BETWEEN', [1,3])  或 ->where([ ['id', 'NOT BETWEEN', [1,3]] ])
+  //$where可以是空数组，方便做不确定多条件的查询，如：
+  $whereArray = [];
+  if(!empty($_POST['age'])){
+      $whereArray[] = ['age', '=', $_POST['age']];
+  }
+  if(!empty($_POST['name'])){
+      $whereArray[] = ['name', 'like', $_POST['name']];
+  }
+  $row = Db::table('users')->where($whereArray)->select();  
 ```
 
 **->whereOr($where, $conditionOrValue = null, $value = null)**  
 * 三个参数和->where一样，说说不同的地方  
-* 如果$where是二维数组，如：  
-  // WHERE (\`name\`='张三' OR \`age\`>18)    
-  ->whereOr([ ['name', '张三'], ['age', '>', 18] ])    
-  // WHERE \`sex\`='男' AND (\`name\`='张三' OR \`age\`>18 OR \`name\`='李四')  
+* 如果$where是二维数组，那么前面连接符为AND，数组间的连接符为OR，如： 
+``` 
+// WHERE `sex`='男' AND (`name`='张三' OR `age`>18 OR `name`='李四')  
 ->where('sex', '男')->whereOr([ ['name', '张三'], ['age', '>', 18], ['name', '李四'] ])   
-* 如果传入2到3个参数，那么连接符为 OR ，如：  
-  // WHERE \`sex\`='男' OR \`name\`='张三'  
-  ->where('sex', '男')->whereOr('name', '张三')  
 ```
-    //$where可以是空数组，方便做不确定多条件的查询，如：
-    $whereArray = [];
-    if(!empty($_POST['age'])){
-        $whereArray[] = ['age', '=', $_POST['age']];
-    }
-    if(!empty($_POST['name'])){
-        $whereArray[] = ['name', 'like', $_POST['name']];
-    }
-    $row = Db::table('users')->where($whereArray)->select();
+* 如果传入2到3个参数，那么连接符为 OR ，如：  
+```
+// WHERE `sex`='男' OR `name`='张三'  
+->where('sex', '男')->whereOr('name', '张三')  
+```
+```
+whereOr 选择二维数组和2到3个参数的组合，可以拼出任意OR AND条件语句
 ```
 **->likeConcat($field, $concat, $concatValue = [])**  
 * $field 需要模糊查询的字段名  
