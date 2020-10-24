@@ -240,6 +240,16 @@ Db::table('users')->where('id', 1)->setIncMany(['money', 'age'], [100,1]);//用�
 //获取单个数据
 $res = Db::table('users')->where('id', 1)->value('tel');
 ```
+**->column($field, $key=false)**  
+* $field 只能是单个字段或者 *
+* $key 指定某个字段作为键
+```
+//获取指定的列值，返回一维数组
+$res = Db::table('users')->where('id', '<', 10)->column('nickname');
+//$res  ['张三', '李四', '王五'...]
+$res = Db::table('users')->where('id', '<', 10)->column('nickname', 'id');
+//$res  [uid=>'张三', uid=>'李四', uid=>'王五'...]
+```
 **->count()**  
 ```
 //获取name是张三的用户有多少个

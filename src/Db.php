@@ -1333,6 +1333,61 @@ class Db{
             return false;
         }
     }
+
+    /**
+     * 获取列值，禁止参数输入多余空格；如："field as fieldB"例子中 as 左右只能有1个空格
+     * @param string $field 需要查询的字段, 只能一个字段名或者 * 号
+     * @param string $key 指定字段作为key值
+     * @return array 如果存在所查询的值则返回值
+     */
+    public function column($field, $key = false) {
+        $selectField = $field;
+        if($key){
+            if($selectField != '*'){
+                $selectField .= ',' . $key;
+            }
+            $key = $this->getFieldAsName($key);
+        }
+        $res = $this->select($selectField);
+        if($selectField === '*' && !$key){
+            return $res;
+        }
+        if (empty($res)) {
+            return [];
+        } else {
+            $new_res = [];
+            $field = $this->getFieldAsName($field);
+            foreach ($res as $val) {
+                if($key){
+                    if($selectField === '*'){
+                        $new_res[$val[$key]] = $val;
+                    }else{
+                        $new_res[$val[$key]] = $val[$field];
+                    }
+                }else{
+                    $new_res[] = $val[$field];
+                }
+            }
+            return $new_res;
+        }
+    }
+
+    /**
+     * 获取查询的字段返回的key
+     * @param $field
+     */
+    public function getFieldAsName($field){
+        $fieldArr = explode(' ', $field);
+        if(count($fieldArr) >= 2){
+            return $fieldArr[count($fieldArr)-1];
+        }else{
+            $fieldArr = explode('.', $field);
+            if(count($fieldArr) == 2){
+                return $fieldArr[count($fieldArr)-1];
+            }
+        }
+        return $field;
+    }
     
     /**
      * @return int
